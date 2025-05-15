@@ -1,6 +1,5 @@
 pragma circom 2.1.6;
 
-include "circomlib/poseidon.circom";
 include "https://github.com/iden3/circomlib/blob/master/circuits/gates.circom";
 include "https://github.com/iden3/circomlib/blob/master/circuits/comparators.circom";
 
@@ -17,11 +16,9 @@ template CheckRow() {
 
     conv_ops[0] = Num2Bits(4);
     
+    // 1 = 1 ^ 2 ^ 3 ^ 4 ^ 5 ^ 6 ^ 7 ^ 8 ^ 9
     1 ==> conv_ops[0].in;
-    xor_out[0][0] <==  conv_ops[0].out[0];
-    xor_out[0][1] <==  conv_ops[0].out[1];
-    xor_out[0][2] <==  conv_ops[0].out[2];
-    xor_out[0][3] <==  conv_ops[0].out[3];
+    xor_out[0] <== conv_ops[0].out;
 
     for(var i = 0; i < 9; i++) {
         conv_ops[i+1] = Num2Bits(4);
@@ -35,11 +32,6 @@ template CheckRow() {
             xor_ops[i * 4 + j].out ==> xor_out[i + 1][j];
         }
     }
-
-    xor_out[9][0] === 0;
-    xor_out[9][1] === 0;
-    xor_out[9][2] === 0;
-    xor_out[9][3] === 0;
 
     out <== xor_out[9][0] + xor_out[9][1] + xor_out[9][2] + xor_out[9][3];
 }
@@ -80,7 +72,6 @@ template BoundCheck() {
         }
     }
 
-    collect === 81;
     out <== collect;
 }
 
@@ -112,7 +103,6 @@ template CheckPublicInput() {
         }
     }
 
-    collect === 81;
     out <== collect;
 }
 
@@ -137,7 +127,7 @@ template SudokuSolver () {
     publicInputCheck.out === 81;
 }
 
-component main = SudokuSolver();
+component main { public [table] } = SudokuSolver();
 
 /* INPUT = {
     "table": [
